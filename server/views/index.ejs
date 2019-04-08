@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Socket</title>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+</head>
+
+<body>
+    <h2 id="message"></h2>
+    <div>
+        <p>Userid: <input type="number" value="1" id="userId"></p>
+        <p>Rank: <input type="text" value="123" id="rank"></p>
+        <p>Level: <input type="text" value="difficult" id="level"></p>
+        <p>SongId: <input type="number" value="1" id="songId"></p>
+        <p>Mode: <input type="number" value="2" id="mode"></p>
+        <p><Button id="find">FIND ROOM</Button></p>
+        <p><Button id="ready">READY</Button></p>
+        <p><Button id="send">SEND SCORE</Button></p>
+        <br>
+        <p><Button id="complete">COMPLETE</Button></p>
+    </div>
+</body>
+
+<script>
+    let room = '';
+    $('#userId').val(Math.floor(Math.random() * 100))
+    var socket = io('http://192.168.1.123:3333');
+
+    function appendMessage(message) {
+        $('#message').text(`${message}`)
+    }
+
+    $('#find').click(() => {
+        const songId = $('#songId').val()
+        const userId = $('#userId').val()
+        const rank = $('#rank').val()
+        const level = $('#level').val()
+        const mode = $('#mode').val()
+
+        socket.emit('findRoom', {
+            songId,
+            userId,
+            level,
+            rank,
+            mode
+        })
+        appendMessage('Find Room')
+    })
+
+    $('#send').click(() => {
+        socket.emit('race', {
+            room,
+            score: Math.floor(Math.random() * 100),
+        })
+    })
+
+    $('#ready').click(() => {
+        socket.emit('ready', {
+            room
+        })
+    })
+
+    $('#complete').click(() => {
+        const mode = $('#mode').val()
+        socket.emit('complete', {
+            room,
+            mode
+        })
+    })
+
+    socket.on('connect', function (data) {
+        console.log(socket.id)
+        appendMessage('Connect')
+    });
+
+    socket.on('start', () => {
+        appendMessage('START')
+    })
+
+    socket.on('message', (data) => {
+        appendMessage(data.message)
+    })
+
+    socket.on('joinRoom', (data) => {
+        const mode = $('#mode').val()
+        room = data.room
+        // appendMessage(room)
+    })
+
+    socket.on('race', data => {
+        const message = `socket id: ${data.socketId} - score: ${data.score}`
+        appendMessage(message)
+    })
+
+    socket.on('lose', message => {
+        appendMessage(`${message}`)
+    })
+
+    socket.on('countdown', data => {
+        appendMessage(data.time)
+    });
+
+    socket.on('rank', data => {
+        let message = ""
+        data.map(user => message += JSON.stringify(user))
+        appendMessage(message)
+    })
+
+</script>
+
+</html>

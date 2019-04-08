@@ -1,0 +1,15 @@
+{
+  "name": "demo-socket-redis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "ioredis": "^4.6.2",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
